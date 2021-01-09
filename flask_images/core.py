@@ -101,8 +101,9 @@ class Images(object):
         app.config.setdefault('IMAGES_PATH', ['static'])
         app.config.setdefault('IMAGES_CACHE', '/tmp/flask-images')
         app.config.setdefault('IMAGES_MAX_AGE', 3600)
+        app.config.setdefault('IMAGES_HOST', None)
 
-        app.add_url_rule(app.config['IMAGES_URL'] + '/<path:path>', app.config['IMAGES_NAME'], self.handle_request)
+        app.add_url_rule(app.config['IMAGES_URL'] + '/<path:path>', app.config['IMAGES_NAME'], self.handle_request, host=app.config['IMAGES_HOST'])
         app.url_build_error_handlers.append(self.build_error_handler)
 
         if hasattr(app, 'add_template_global'): # Flask >= 0.10
@@ -159,6 +160,7 @@ class Images(object):
 
         external = kwargs.pop('external', None) or kwargs.pop('_external', None)
         scheme = kwargs.pop('scheme', None)
+        host = kwargs.pop('host', None)
         if scheme and not external:
             raise ValueError('cannot specify scheme without external=True')
         if kwargs.get('_anchor'):
@@ -221,7 +223,7 @@ class Images(object):
         if external:
             url = '%s://%s%s/%s' % (
                 scheme or request.scheme,
-                request.host,
+                host or request.host,
                 request.script_root,
                 url.lstrip('/')
             )
